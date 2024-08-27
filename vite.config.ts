@@ -22,24 +22,25 @@ export default defineConfig(({ command, mode }) => {
         relativeCSSInjection: true,
       }),
       codegen({ matchOnSchemas: true, debug: true, throwOnBuild: false }),
+      dynamicImport(),
       chunkSplitPlugin({
         strategy: 'single-vendor',
-        customChunk(context) {
-          const { file } = context;
-          console.log({ file });
-          if (
-            file.startsWith('src/pages') ||
-            file.startsWith('src/components') ||
-            file.startsWith('src/features') ||
-            file.startsWith('src/hooks') ||
-            file.startsWith('src/utils') ||
-            file.startsWith('src/theme') ||
-            file.startsWith('src/react-query') ||
-            file.startsWith('src/graphql-client')
-          ) {
-            return file;
-          }
-        },
+        // customChunk(context) {
+        //   const { file } = context;
+        //   console.log({ file });
+        //   if (
+        //     file.startsWith('src/pages') ||
+        //     file.startsWith('src/components') ||
+        //     file.startsWith('src/features') ||
+        //     file.startsWith('src/hooks') ||
+        //     file.startsWith('src/utils') ||
+        //     file.startsWith('src/theme') ||
+        //     file.startsWith('src/react-query') ||
+        //     file.startsWith('src/graphql-client')
+        //   ) {
+        //     return file;
+        //   }
+        // },
         customSplitting: {
           chakra: [/@chakra-ui/],
           tanstack: [/@tanstack/],
@@ -65,7 +66,6 @@ export default defineConfig(({ command, mode }) => {
           vendor: [/node_modules/],
         },
       }),
-      dynamicImport(),
     ],
 
     server: {
