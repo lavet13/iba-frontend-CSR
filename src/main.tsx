@@ -7,8 +7,8 @@ import ReactQueryProvider from './react-query/react-query-provider';
 
 const root = document.getElementById('root') as HTMLElement;
 
-// const cookies = document.cookie;
-const cookies = undefined;
+const cookies = document.cookie;
+// const cookies = undefined;
 
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
