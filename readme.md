@@ -45,7 +45,7 @@ to bundle CSS into JS file.
 [preamble]: https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/src/fast-refresh.ts#L30
 
 ## Planning:
-- nginx
+- create separate endpoint called api and setup a proxy for it
 - animate pages using react-router, startTransition
 - Query Key Factory
 - sticky stuff(if needed)

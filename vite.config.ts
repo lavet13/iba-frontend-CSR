@@ -69,8 +69,23 @@ export default defineConfig(({ command, mode }) => {
     ],
 
     server: {
+      host: true,
       port: 5173,
       strictPort: true,
+      hmr: {
+        clientPort: 5173,
+        port: 5173,
+      },
+      proxy: {
+        '/graphql': {
+          target: 'http://localhost:80',
+          changeOrigin: true,
+        },
+        '/assets/qr-codes': {
+          target: 'http://localhost:80',
+          changeOrigin: true,
+        },
+      },
     },
 
     build: {
