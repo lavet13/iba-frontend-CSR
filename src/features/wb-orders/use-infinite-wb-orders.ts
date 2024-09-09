@@ -15,13 +15,13 @@ type UseInfiniteWbOrdersProps = {
   take: number;
   status?: OrderStatus | 'ALL';
   query: string;
-  searchType?: SearchTypeWbOrders[];
+  searchType?: SearchTypeWbOrders | 'ALL';
   options?: InitialDataInfiniteOptions<WbOrdersQuery, TPageParam>;
 };
 
 export const useInfiniteWbOrders = ({
   query,
-  searchType = [SearchTypeWbOrders.Id],
+  searchType = 'ALL',
   take = 30,
   status = 'ALL',
   options,
@@ -63,7 +63,9 @@ export const useInfiniteWbOrders = ({
         return await client.request(wbOrders, {
           input: {
             query,
-            searchType,
+            ...(searchType === 'ALL'
+              ? { searchType: Object.values(SearchTypeWbOrders) }
+              : { searchType: [searchType] }),
             take,
             after: pageParam.after,
             ...(status === 'ALL' ? {} : { status }),

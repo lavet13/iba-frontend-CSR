@@ -82,7 +82,8 @@ import { HiArrowLongLeft } from 'react-icons/hi2';
 import useIsClient from '../../utils/ssr/use-is-client';
 import { useScrollDirection } from 'react-use-scroll-direction';
 import { ScrollDirection } from 'react-use-scroll-direction/dist/useScrollDirection';
-import { CloseIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, CloseIcon } from '@chakra-ui/icons';
+import SelectInput from '../../components/select-input';
 
 type HandleSubmitProps = (
   values: InitialValues,
@@ -148,31 +149,21 @@ const getSortByStatus = (sortByStatusParam: string): OrderStatus | 'ALL' => {
   return 'ALL';
 };
 
-const getSearchType = (searchParamValue: string) => {
+const getSearchType = (
+  searchParamValue: string
+): SearchTypeWbOrders | 'ALL' => {
   const validTypes = new Set(Object.values(SearchTypeWbOrders));
 
-  try {
-    const parsed = JSON.parse(searchParamValue);
+  const upperCaseParam = searchParamValue.toUpperCase();
 
-    if (Array.isArray(parsed)) {
-      // Filter out invalid types and ensure all values are of type SearchTypeWbOrders
-      const validParsed = parsed.filter((type): type is SearchTypeWbOrders =>
-        validTypes.has(type)
-      );
-
-      return validParsed.length > 0
-        ? validParsed
-        : Object.values(SearchTypeWbOrders);
-    } else {
-      return Object.values(SearchTypeWbOrders);
-    }
-  } catch (err) {
-    return Object.values(SearchTypeWbOrders);
+  if (validTypes.has(upperCaseParam as SearchTypeWbOrders)) {
+    return upperCaseParam as SearchTypeWbOrders;
   }
+
+  return 'ALL';
 };
 
 const WbOrders: FC = () => {
-  const { isClient } = useIsClient();
   const { scrollDirection } = useScrollDirection();
   const deferredScrollDirection = useDeferredValue(scrollDirection);
   const lastScrollDirection = useRef<ScrollDirection>(null);
@@ -229,8 +220,6 @@ const WbOrders: FC = () => {
     query: deferredSearchQuery,
     searchType,
   });
-
-  useEffect(() => {}, [isClient]);
 
   const { newOrder, error } = useNewWbOrderSubscription();
 
@@ -345,7 +334,7 @@ const WbOrders: FC = () => {
               const query = new URLSearchParams(params.toString());
 
               query.set('sort_by_status', values.sortStatus);
-              query.set('search_type', JSON.stringify(values.searchType));
+              query.set('search_type', values.searchType);
 
               return query;
             });
@@ -374,13 +363,11 @@ const WbOrders: FC = () => {
             <Container>
               <SimpleGrid my={2} gap={2} minChildWidth={'230px'}>
                 {isLargerThanMd && (
-                  <SelectWrapper
-                    labelSize={'sm'}
-                    size='sm'
-                    isLoading={isPending}
+                  <SelectInput
                     name='sortStatus'
                     label='Сортировать статус'
-                    placeholder='Выберите статус'
+                    size='sm'
+                    isLoading={isPending}
                     data={[
                       { label: 'ВСЕ', value: 'ALL' },
                       { label: 'СОБРАН', value: 'ASSEMBLED' },
@@ -391,17 +378,13 @@ const WbOrders: FC = () => {
                 )}
 
                 {isLargerThanMd && deferredSearchQuery.length !== 0 && (
-                  <SelectWrapper
-                    isMulti
-                    closeMenuOnSelect={false}
+                  <SelectInput
                     size='sm'
-                    {...(isLargerThanMd
-                      ? { label: 'Выберите тип поиска' }
-                      : {})}
+                    label='Выберите тип поиска'
                     isLoading={isPending}
                     name='searchType'
-                    placeholder='Выберите тип поиска'
                     data={[
+                      { label: 'ВСЕ', value: 'ALL' },
                       { label: 'ID', value: 'ID' },
                       { label: 'ФИО', value: 'NAME' },
                       { label: 'ТЕЛЕФОН', value: 'PHONE' },
@@ -410,72 +393,66 @@ const WbOrders: FC = () => {
                   />
                 )}
 
-                {isClient && (
-                  <>
-                    <InputGroup size='sm' alignSelf='end'>
-                      <InputLeftElement pointerEvents={'none'}>
-                        {isStaleSearchQuery ? (
-                          <Spinner boxSize={4} />
-                        ) : (
-                          <Icon as={HiSearch} boxSize={4} />
-                        )}
-                      </InputLeftElement>
-                      <Input
-                        pr={!isLargerThanMd ? '3.35rem' : undefined}
-                        value={searchQuery}
-                        onChange={e => {
+                <InputGroup size='sm' alignSelf='end'>
+                  <InputLeftElement pointerEvents={'none'}>
+                    {isStaleSearchQuery ? (
+                      <Spinner boxSize={4} />
+                    ) : (
+                      <Icon as={HiSearch} boxSize={4} />
+                    )}
+                  </InputLeftElement>
+                  <Input
+                    pr={!isLargerThanMd ? '3.35rem' : undefined}
+                    value={searchQuery}
+                    onChange={e => {
+                      setSearchParams(params => {
+                        const query = new URLSearchParams(params.toString());
+
+                        if (e.target.value.length === 0) {
+                          query.delete('q');
+                          return query;
+                        }
+
+                        query.set('q', e.target.value);
+                        return query;
+                      });
+                    }}
+                    placeholder={'Искать заявку...'}
+                  />
+
+                  <InputRightElement
+                    gap={0.5}
+                    pr={'0.2rem'}
+                    width={!isLargerThanMd ? 'auto' : '2rem'}
+                  >
+                    {searchQuery.length !== 0 && (
+                      <IconButton
+                        variant='ghost'
+                        size='xs'
+                        aria-label='clear search'
+                        onClick={() =>
                           setSearchParams(params => {
-                            const query = new URLSearchParams(
-                              params.toString()
-                            );
+                            const query = new URLSearchParams(params);
 
-                            if (e.target.value.length === 0) {
-                              query.delete('q');
-                              return query;
-                            }
+                            query.delete('q');
 
-                            query.set('q', e.target.value);
                             return query;
-                          });
-                        }}
-                        placeholder={'Искать заявку...'}
+                          })
+                        }
+                        icon={<CloseIcon boxSize={2.5} />}
                       />
-
-                      <InputRightElement
-                        gap={0.5}
-                        pr={'0.2rem'}
-                        width={!isLargerThanMd ? 'auto' : '2rem'}
-                      >
-                        {searchQuery.length !== 0 && (
-                          <IconButton
-                            variant='ghost'
-                            size='xs'
-                            aria-label='clear search'
-                            onClick={() =>
-                              setSearchParams(params => {
-                                const query = new URLSearchParams(params);
-
-                                query.delete('q');
-
-                                return query;
-                              })
-                            }
-                            icon={<CloseIcon boxSize={2.5} />}
-                          />
-                        )}
-                        {!isLargerThanMd && (
-                          <IconButton
-                            variant='ghost'
-                            size='xs'
-                            aria-label='filter orders'
-                            onClick={onFilterOpen}
-                            icon={<Icon as={HiFilter} boxSize={4} />}
-                          />
-                        )}
-                      </InputRightElement>
-                    </InputGroup>
-                  </>
-                )}
+                    )}
+                    {!isLargerThanMd && (
+                      <IconButton
+                        variant='ghost'
+                        size='xs'
+                        aria-label='filter orders'
+                        onClick={onFilterOpen}
+                        icon={<Icon as={HiFilter} boxSize={4} />}
+                      />
+                    )}
+                  </InputRightElement>
+                </InputGroup>
               </SimpleGrid>
             </Container>
             <AutoSubmit />
@@ -810,10 +787,10 @@ const WbOrders: FC = () => {
                           </Button>
                         )}
 
-                        <SelectWrapper
+                        <SelectInput
                           name='status'
                           label='Выберите статус'
-                          placeholder='Выберите статус'
+                          size='sm'
                           data={Object.entries(statusMapText).map(
                             ([value, label]) => ({
                               label,
@@ -868,10 +845,7 @@ const WbOrders: FC = () => {
                       const query = new URLSearchParams(params.toString());
 
                       query.set('sort_by_status', values.sortStatus);
-                      query.set(
-                        'search_type',
-                        JSON.stringify(values.searchType)
-                      );
+                      query.set('search_type', values.searchType);
 
                       return query;
                     });
@@ -882,12 +856,11 @@ const WbOrders: FC = () => {
                   <Form>
                     <Container>
                       <SimpleGrid gap={2} minChildWidth={'230px'}>
-                        <SelectWrapper
-                          size='sm'
-                          isLoading={isPending}
+                        <SelectInput
                           name='sortStatus'
                           label='Сортировать статус'
-                          placeholder='Выберите статус'
+                          size='sm'
+                          isLoading={isPending}
                           data={[
                             { label: 'ВСЕ', value: 'ALL' },
                             { label: 'СОБРАН', value: 'ASSEMBLED' },
@@ -895,15 +868,13 @@ const WbOrders: FC = () => {
                             { label: 'ОТКЛОНЕН', value: 'REJECTED' },
                           ]}
                         />
-                        <SelectWrapper
-                          isMulti
-                          closeMenuOnSelect={false}
+                        <SelectInput
                           size='sm'
                           label='Выберите тип поиска'
                           isLoading={isPending}
                           name='searchType'
-                          placeholder='Выберите тип поиска'
                           data={[
+                            { label: 'ВСЕ', value: 'ALL' },
                             { label: 'ID', value: 'ID' },
                             { label: 'ФИО', value: 'NAME' },
                             { label: 'ТЕЛЕФОН', value: 'PHONE' },
