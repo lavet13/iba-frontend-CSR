@@ -4,6 +4,7 @@ import type { ThemeConfig } from '@chakra-ui/react';
 import styles from './styles';
 import semanticTokens from './semantic-tokens';
 
+import Select from './components/select';
 import Container from './components/container';
 import Button from './components/button';
 import Card from './components/card';
@@ -18,6 +19,7 @@ const theme = extendTheme({
     Container,
     Button,
     Card,
+    Select,
   },
   config,
   styles,
