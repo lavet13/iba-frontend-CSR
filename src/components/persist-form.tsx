@@ -65,11 +65,16 @@ class PersistImpl extends React.Component<
 
     Promise.resolve(storage.getItem(name)).then(storageState => {
       if (storageState !== null) {
+        let parsedState;
         if (typeof storageState === 'object') {
-          formik.setFormikState(storageState);
+          parsedState = storageState;
         } else if (typeof storageState === 'string') {
-          formik.setFormikState(JSON.parse(storageState));
+          parsedState = JSON.parse(storageState);
         }
+
+        parsedState.isSubmitting = false;
+
+        formik.setFormikState(parsedState);
       }
 
       if (handleValidation) {
