@@ -17,7 +17,7 @@ class PersistImpl extends React.Component<
   {}
 > {
   static defaultProps = {
-    debounce: 300,
+    debounce: 1,
     ignore: [],
   };
 
