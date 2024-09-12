@@ -17,10 +17,11 @@ class PersistImpl extends React.Component<
   {}
 > {
   static defaultProps = {
+    debounce: 300,
     ignore: [],
   };
 
-  saveForm = (data: FormikProps<{}>) => {
+  saveForm = _.debounce((data: FormikProps<{}>) => {
     const { ignore = [], storage = window.localStorage, name } = this.props;
     data.values = _.omit(data.values, ignore);
 
@@ -30,7 +31,7 @@ class PersistImpl extends React.Component<
     }
 
     storage.setItem(name, JSON.stringify(data));
-  };
+  }, this.props.debounce);
 
   componentDidUpdate(
     prevProps: Readonly<PersistProps & { formik: FormikProps<any> }>
