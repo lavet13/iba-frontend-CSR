@@ -81,7 +81,11 @@ export default defineConfig(({ command, mode }) => {
           target: 'http://localhost:80',
           changeOrigin: true,
         },
-        '/assets/qr-codes': {
+        '/api': {
+          target: 'http://localhost:80',
+          changeOrigin: true,
+        },
+        '/assets': {
           target: 'http://localhost:80',
           changeOrigin: true,
         },

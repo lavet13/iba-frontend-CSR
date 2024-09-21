@@ -45,11 +45,10 @@ to bundle CSS into JS file.
 [preamble]: https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/src/fast-refresh.ts#L30
 
 ## Planning:
-- fix the bug when it's stuck with loading
+- create separate endpoint called api and setup a proxy for it
 - use /graphql to retrieve images
 - Dashboard example, replicate
 - SOLID
-- create separate endpoint called api and setup a proxy for it
 - animate pages using react-router, startTransition
 - sticky stuff(if needed)
 - Query Key Factory
